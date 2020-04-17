@@ -1,0 +1,78 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: github-listener-interceptor
+spec:
+  serviceAccountName: tekton-triggers-example-sa
+  triggers:
+    # - name: normal-push
+    #   interceptors:
+    #     - github:
+    #         secretRef:
+    #           secretName: githubsecret
+    #           secretKey: secretToken
+    #         eventTypes:
+    #           - push
+    #     - cel:
+    #         filter: "!body.ref.contains('master')"
+    #     - cel:
+    #         filter: "!body.ref.contains('develop')"
+    #   bindings:
+    #     - name: git-common
+    #     - name: git-repo-name
+    #     - name: git-ref
+    #   template:
+    #     name: pipeline-not-master
+    - name: master-push
+      interceptors:
+        - github:
+            secretRef:
+              secretName: githubsecret
+              secretKey: secretToken
+            eventTypes:
+              - push
+        - cel:
+            filter: "body.ref.contains('master')"
+      bindings:
+        - name: git-repo-name
+        - name: git-common
+      template:
+        name: pipeline-master
+    - name: dev-push
+      interceptors:
+        - github:
+            secretRef:
+              secretName: githubsecret
+              secretKey: secretToken
+            eventTypes:
+              - push
+        - cel:
+            filter: "body.ref.contains('develop')"
+      bindings:
+        - name: git-common
+        - name: git-repo-name
+      template:
+        name: pipeline-dev
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: rise-server-connect
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+  name: tekton
+spec:
+  rules:
+    - host: tek-web.tektonbot.io
+      http:
+        paths:
+          - backend:
+              serviceName: el-github-listener-interceptor
+              servicePort: http-listener
+            path: /docker
+  tls:
+    - hosts:
+        - tek-web.tektonbot.io
+      secretName: tek-web-tls-secret

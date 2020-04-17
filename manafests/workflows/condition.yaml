@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Condition
+metadata:
+  name: is-branch
+spec:
+  params:
+  - name: branchref
+    type: string
+  resources:
+    - name: workspace
+      type: git
+  check:
+    image: alpine
+    script: |
+      #!/bin/sh
+      echo $(resources.workspace.revision)
+      echo $(params.branchref)
+      if [ $(resources.workspace.revision) == $(params.branchref) ]; then
+        exit 0
+      else
+        exit 1
+      fi
+---

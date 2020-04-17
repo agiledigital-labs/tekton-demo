@@ -1,0 +1,26 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: git-ops-master
+spec:
+  type: git
+  params:
+    - name: revision
+      value: master
+    - name: url
+      value: <replace>
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: git-ops-dev
+spec:
+  type: git
+  params:
+    - name: revision
+      value: develop
+    - name: url
+      value: <replace>
+---
+

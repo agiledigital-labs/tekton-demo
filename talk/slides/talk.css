@@ -1,5 +1,6 @@
-img[alt="argocd"] {
+img[alt="tekton"] {
   max-height: 40vh;
+  background-color: aliceblue !important;
 }
 img[alt="rooda2"] {
   max-height: 300px;

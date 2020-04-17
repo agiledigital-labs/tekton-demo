@@ -1,0 +1,23 @@
+# ---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   annotations:
+#     cert-manager.io/cluster-issuer: argodemo-connect
+#     kubernetes.io/ingress.class: nginx
+#     kubernetes.io/tls-acme: "true"
+#   name: minio
+#   namespace: minio
+# spec:
+#   rules:
+#   - host: minio.argodemo.com
+#     http:
+#       paths:
+#       - backend:
+#           serviceName: minio-hl-svc
+#           servicePort: 9000
+#         path: /
+#   tls:
+#   - hosts:
+#     - minio.argodemo.com
+#     secretName: minio-tls-secret

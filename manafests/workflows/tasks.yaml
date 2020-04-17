@@ -1,0 +1,124 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-push
+spec:
+  params:
+    - name: pathToDockerFile
+      description: The path to the dockerfile to build
+      default: /workspace/workspace/Dockerfile
+    - name: pathToContext
+      description: The build context used by Kaniko (https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts)
+      default: /workspace/workspace
+  resources:
+    inputs:
+      - name: workspace
+        type: git
+    outputs:
+      - name: builtImage
+        type: image
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v0.15.0
+      # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential
+      env:
+        - name: "DOCKER_CONFIG"
+          value: "/tekton/home/.docker/"
+      command:
+        - /kaniko/executor
+      args:
+        - --dockerfile=$(params.pathToDockerFile)
+        - --destination=$(resources.outputs.builtImage.url)
+        - --context=$(params.pathToContext)
+        - --snapshotMode=time
+---
+# This task deploys with kubectl apply -f <filename>
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-master
+spec:
+  resources:
+    inputs:
+      - name: workspace
+        type: git
+  steps:
+    - name: echo
+      image: alpine
+      script: |
+        #!/usr/bin/env sh
+        echo $(date) > workspace/now.txt
+        echo $(resources.inputs.workspace.revision) >> workspace/now.txt
+    - name: git
+      image: alpine/git
+      script: |
+        #!/usr/bin/env sh
+        cd workspace
+        ls -lat
+        git config user.email 'infrastructure@tektonbot.io'
+        git config user.name 'tekton-bot'
+        git add now.txt
+        git commit -m 'Tekton = demo: Update deployment'
+        echo '[credential]' >> .git/config
+        echo 'helper = "!f() { sleep 1; echo username=$GIT_USERNAME; echo password=$GIT_PASSWORD; }; f"' >> .git/config
+        export DATE_NOW=$(date +%s) 
+        export BRANCH=$(resources.inputs.workspace.revision)
+        git checkout -b $(resources.inputs.workspace.revision)-$DATE_NOW
+        git push --set-upstream origin $(resources.inputs.workspace.revision)-$DATE_NOW
+      env:
+        - name: GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: basic-user-pass
+              key: username
+        - name: GIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: basic-user-pass
+              key: password
+---
+# This task deploys with kubectl apply -f <filename>
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-dev
+spec:
+  resources:
+    inputs:
+      - name: workspace
+        type: git
+  steps:
+    - name: echo
+      image: alpine
+      script: |
+        #!/usr/bin/env sh
+        echo $(date) > workspace/now.txt
+        echo $(resources.inputs.workspace.revision) >> workspace/now.txt
+    - name: git
+      image: alpine/git
+      script: |
+        #!/usr/bin/env sh
+        cd workspace
+        ls -lat
+        git config user.email 'infrastructure@tektonbot.io'
+        git config user.name 'tekton-bot'
+        git add now.txt
+        git commit -m 'Tekton = demo: Update deployment'
+        echo '[credential]' >> .git/config
+        echo 'helper = "!f() { sleep 1; echo username=$GIT_USERNAME; echo password=$GIT_PASSWORD; }; f"' >> .git/config
+        git checkout -b develop
+        git push --set-upstream origin develop
+      env:
+        - name: GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: basic-user-pass
+              key: username
+        - name: GIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: basic-user-pass
+              key: password
+---
+

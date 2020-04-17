@@ -1,0 +1,97 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: pipeline-master
+spec:
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: master
+    - name: gitref
+      description: The git gitref
+      default: master
+    - name: gitreponame
+      description: The git and image repo name
+      default: rise-sink
+    - name: gitrepositoryurl
+      description: The git repository url
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: pipeline-master-
+      spec:
+        pipelineRef:
+          name: single-image-pipe
+        params:
+          - name: slack-secret
+            value: basic-slack
+          - name: slack-message-url
+            value: $(params.gitrepositoryurl)
+        resources:
+          - name: argocd-repo
+            resourceRef:
+              name: git-ops-master
+          - name: source-repo
+            resourceSpec:
+              type: git
+              params:
+                - name: revision
+                  value: $(params.gitrevision)
+                - name: url
+                  value: $(params.gitrepositoryurl)
+          - name: image
+            resourceSpec:
+              type: image
+              params:
+                - name: url
+                  value: adelabs/$(params.gitreponame):$(params.gitref)
+        serviceAccountName: build-bot
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: pipeline-dev
+spec:
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: develop
+    - name: gitref
+      description: The git gitref
+      default: develop
+    - name: gitreponame
+      description: The git and image repo name
+      default: rise-sink
+    - name: gitrepositoryurl
+      description: The git repository url
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: pipeline-dev-
+      spec:
+        pipelineRef:
+          name: single-image-pipe
+        params:
+          - name: slack-secret
+            value: basic-slack
+        resources:
+          - name: argocd-repo
+            resourceRef:
+              name: git-ops-dev
+          - name: source-repo
+            resourceSpec:
+              type: git
+              params:
+                - name: revision
+                  value: $(params.gitrevision)
+                - name: url
+                  value: $(params.gitrepositoryurl)
+          - name: image
+            resourceSpec:
+              type: image
+              params:
+                - name: url
+                  value: adelabs/$(params.gitreponame):$(params.gitref)
+        serviceAccountName: build-bot
