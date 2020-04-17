@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "reveal-md": "^3.4.1"
+  },
+  "scripts": {
+    "start": "reveal-md slides/slides.md  --title ArgoCD -w --theme league --css slides/talk.css"
+  }
+}
