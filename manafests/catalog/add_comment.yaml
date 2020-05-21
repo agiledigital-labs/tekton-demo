@@ -6,30 +6,29 @@ metadata:
   description: |
     This Task will add a comment to a pull request or an issue.
 spec:
-  inputs:
-    params:
-      - name: GITHUB_HOST_URL
-        description: |
-          The GitHub host, adjust this if you run a GitHub enteprise.
-        default: "api.github.com"
-        type: string
+  params:
+    - name: GITHUB_HOST_URL
+      description: |
+        The GitHub host, adjust this if you run a GitHub enteprise.
+      default: "api.github.com"
+      type: string
 
-      - name: API_PATH_PREFIX
-        description: |
-          The API path prefix, GitHub Enterprise has a prefix e.g. /api/v3
-        default: ""
-        type: string
+    - name: API_PATH_PREFIX
+      description: |
+        The API path prefix, GitHub Enterprise has a prefix e.g. /api/v3
+      default: ""
+      type: string
 
-      - name: REQUEST_URL
-        description: |
-          The GitHub issue or pull request URL where we want to add a new
-          comment.
-        type: string
+    - name: REQUEST_URL
+      description: |
+        The GitHub issue or pull request URL where we want to add a new
+        comment.
+      type: string
 
-      - name: COMMENT
-        description: |
-          The actual comment to add.
-        type: string
+    - name: COMMENT
+      description: |
+        The actual comment to add.
+      type: string
   steps:
     - name: add-comment
       env:
