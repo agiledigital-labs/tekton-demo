@@ -2,6 +2,51 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
+  name: github-listener-node-tek
+spec:
+  serviceAccountName: tekton-triggers-example-sa-tek
+  triggers:
+    - name: normal-push
+      interceptors:
+        - github:
+            secretRef:
+              secretName: githubsecret-tek
+              secretKey: secretToken
+            eventTypes:
+              - push
+      bindings:
+        - name: git-repo-name-tek
+        - name: git-common-tek
+        - name: number-12
+      template:
+        name: node-pipe
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: github-listener-node-13-tek
+spec:
+  serviceAccountName: tekton-triggers-example-sa-tek
+  triggers:
+    - name: normal-push
+      interceptors:
+        - github:
+            secretRef:
+              secretName: githubsecret-tek
+              secretKey: secretToken
+            eventTypes:
+              - push
+      bindings:
+        - name: git-repo-name-tek
+        - name: git-common-tek
+        - name: number-13
+      template:
+        name: node-pipe
+
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
   name: github-listener-interceptor-tek
 spec:
   serviceAccountName: tekton-triggers-example-sa-tek
@@ -72,6 +117,14 @@ spec:
               serviceName: el-github-listener-interceptor-tek
               servicePort: http-listener
             path: /docker
+          - backend:
+              serviceName: el-github-listener-node-tek
+              servicePort: http-listener
+            path: /node
+          - backend:
+              serviceName: el-github-listener-node-13-tek
+              servicePort: http-listener
+            path: /node13
   tls:
     - hosts:
         - tek-demo.live

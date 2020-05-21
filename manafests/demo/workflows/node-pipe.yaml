@@ -1,0 +1,149 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: node-build
+spec:
+  params:
+    - name: packager
+      default: yarn
+    - name: node-version
+      default: "12"
+  workspaces:
+    - name: shared-data
+  steps:
+    - name: build
+      image: node:$(params.node-version)
+      script: |
+        cd $(workspaces.shared-data.path)
+        $(params.packager) build
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: node-test
+spec:
+  params:
+    - name: packager
+      default: yarn
+    - name: node-version
+      default: "12"
+  workspaces:
+    - name: shared-data
+  resources:
+    inputs:
+      - name: source-repo
+        type: git
+        targetPath: shared-data
+  steps:
+    - name: test
+      image: node:$(params.node-version)
+      script: |
+        cd $(workspaces.shared-data.path)
+        $(params.packager) install
+        $(params.packager) test
+        ls $(workspaces.shared-data.path)
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: node-deploy
+spec:
+  params:
+    - name: packager
+      default: yarn
+    - name: node-version
+      default: "12"
+  workspaces:
+    - name: shared-data
+  steps:
+    - name: deploy
+      image: node:$(params.node-version)
+      command:
+        - ls
+      args:
+        - $(workspaces.shared-data.path)/build
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: node-pipe
+spec:
+  workspaces:
+    - name: shared-data
+  resources:
+    - name: source-repo
+      type: git
+  params:
+    - name: slack-secret
+      type: string
+    - name: slack-message-url
+      type: string
+    - name: packager
+      type: string
+      default: yarn
+    - name: node-version
+      type: string
+      default: "12"
+  tasks:
+    - name: send-slack-start
+      params:
+        - name: webhook-secret
+          value: $(params.slack-secret)
+        - name: message
+          value: The node build for $(params.slack-message-url) started
+      taskRef:
+        name: send-to-channel-slack
+    - name: test
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
+      taskRef:
+        name: node-test
+      params:
+        - name: packager
+          value: $(params.packager)
+        - name: node-version
+          value: $(params.node-version)
+      resources:
+        inputs:
+          - name: source-repo
+            resource: source-repo
+      runAfter:
+        - send-slack-start
+    - name: build
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
+      taskRef:
+        name: node-build
+      params:
+        - name: packager
+          value: $(params.packager)
+        - name: node-version
+          value: $(params.node-version)
+      runAfter:
+        - test
+    - name: deploy
+      workspaces:
+        - name: shared-data
+          workspace: shared-data
+      taskRef:
+        name: node-deploy
+      params:
+        - name: packager
+          value: $(params.packager)
+        - name: node-version
+          value: $(params.node-version)
+      runAfter:
+        - build
+    - name: send-slack-end
+      conditions:
+      params:
+        - name: webhook-secret
+          value: $(params.slack-secret)
+        - name: message
+          value: "The node for $(params.slack-message-url) finished "
+      taskRef:
+        name: send-to-channel-slack
+      runAfter:
+        - deploy

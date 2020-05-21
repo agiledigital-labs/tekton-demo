@@ -53,3 +53,30 @@ spec:
   params:
     - name: gitsha
       value: $(body.head_commit.id)
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: number-12
+spec:
+  params:
+    - name: number
+      value: "12"
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: number-13
+spec:
+  params:
+    - name: number
+      value: "13"
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: number-14
+spec:
+  params:
+    - name: number
+      value: "14"
