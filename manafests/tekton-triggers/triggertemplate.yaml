@@ -105,11 +105,8 @@ metadata:
 spec:
   params:
     - name: git-repo-full-name
-      type: string
     - name: git-repo-sha
-      type: string
     - name: git-repo-target-url
-      type: string
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun

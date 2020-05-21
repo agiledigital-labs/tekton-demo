@@ -49,7 +49,7 @@ spec:
       taskRef:
         name: send-to-webhook-slack
       runAfter:
-        - status
+        - status-set
     - name: status-change
       taskRef:
         name: github-set-status
