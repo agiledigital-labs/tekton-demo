@@ -83,21 +83,11 @@ A PipelineRun allows you to instantiate and execute a Pipeline on-cluster.
 
 ---
 
-## The cool Aid \*
+## Triggers 
 
-- You have to use a git ops CI/CD
-
-![rooda2](rooda2.png)
+- webhooks...
 
 ---
 
-## The cool Aid \*
-
-- You have to use a git ops style CI/CD
-  - It is (should be) safer,
-  - It is (should be) easier to duplicate and environment
-  - It is (should be) easier to debug
-
----
 
 ## Demo
