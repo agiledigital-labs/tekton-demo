@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: single-image-pipe
+  name: single-image-pipe-tek
 spec:
   resources:
     - name: source-repo
@@ -23,10 +23,10 @@ spec:
         - name: message
           value: The Pipeline for $(params.slack-message-url) started
       taskRef:
-        name: send-to-webhook-slack
+        name: send-to-channel-slack
     - name: build
       taskRef:
-        name: build-push
+        name: build-push-tek
       params:
         - name: pathToDockerFile
           value: /workspace/workspace/Dockerfile
@@ -52,7 +52,7 @@ spec:
               resource: argocd-repo
       taskRef:
         kind: Task
-        name: git-dev
+        name: git-dev-tek
       runAfter:
         - build
       resources:
@@ -70,7 +70,7 @@ spec:
               resource: argocd-repo
       taskRef:
         kind: Task
-        name: git-master
+        name: git-master-tek
       runAfter:
         - build
       resources:
@@ -85,7 +85,7 @@ spec:
         - name: message
           value: "The Pipeline for $(params.slack-message-url) finished"
       taskRef:
-        name: send-to-webhook-slack
+        name: send-to-channel-slack
       runAfter:
         - build
         - push-master

@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: git-common
+  name: git-common-tek
 spec:
   params:
     - name: gitrevision
@@ -12,7 +12,7 @@ spec:
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: git-ref
+  name: git-ref-tek
 spec:
   params:
     - name: gitref
@@ -21,7 +21,7 @@ spec:
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: git-repo-name
+  name: git-repo-name-tek
 spec:
   params:
     - name: gitreponame
@@ -30,26 +30,26 @@ spec:
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: git-repo-full-name
+  name: git-repo-full-name-tek
 spec:
   params:
-    - name: gitreponame
+    - name: gitfullname
       value: $(body.repository.full_name)
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: git-repo-target-url
+  name: git-repo-target-url-tek
 spec:
   params:
-    - name: gitreponame
-      value: $(body.commits.url)
+    - name: giturl
+      value: $(body.head_commit.url)
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: git-repo-sha
+  name: git-repo-sha-tek
 spec:
   params:
-    - name: gitreponame
-      value: $(body.commits.id)
+    - name: gitsha
+      value: $(body.head_commit.id)

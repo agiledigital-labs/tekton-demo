@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: build-push
+  name: build-push-tek
 spec:
   params:
     - name: pathToDockerFile
@@ -37,7 +37,7 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: git-master
+  name: git-master-tek
 spec:
   resources:
     inputs:
@@ -82,7 +82,7 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: git-dev
+  name: git-dev-tek
 spec:
   resources:
     inputs:

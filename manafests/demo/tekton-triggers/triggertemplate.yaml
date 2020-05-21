@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: pipeline-master
+  name: pipeline-master-tek
 spec:
   params:
     - name: gitrevision
@@ -22,10 +22,10 @@ spec:
         generateName: pipeline-master-
       spec:
         pipelineRef:
-          name: single-image-pipe
+          name: single-image-pipe-tek
         params:
           - name: slack-secret
-            value: webhook-secret
+            value: webhook-secret-tek
           - name: slack-message-url
             value: $(params.gitrepositoryurl)
         resources:
@@ -46,12 +46,12 @@ spec:
               params:
                 - name: url
                   value: adelabs/$(params.gitreponame):$(params.gitref)
-        serviceAccountName: build-bot
+        serviceAccountName: build-bot-tek
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: pipeline-dev
+  name: pipeline-dev-tek
 spec:
   params:
     - name: gitrevision
@@ -72,10 +72,10 @@ spec:
         generateName: pipeline-dev-
       spec:
         pipelineRef:
-          name: single-image-pipe
+          name: single-image-pipe-tek
         params:
           - name: slack-secret
-            value: webhook-secret
+            value: webhook-secret-tek
           - name: slack-message-url
             value: $(params.gitrepositoryurl)
         resources:
@@ -96,7 +96,7 @@ spec:
               params:
                 - name: url
                   value: adelabs/$(params.gitreponame):$(params.gitref)
-        serviceAccountName: build-bot
+        serviceAccountName: build-bot-tek
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
@@ -104,9 +104,9 @@ metadata:
   name: git-status-pipe
 spec:
   params:
-    - name: git-repo-full-name
-    - name: git-repo-sha
-    - name: git-repo-target-url
+    - name: gitfullname
+    - name: giturl
+    - name: gitsha
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
@@ -117,13 +117,13 @@ spec:
           name: git-status-pipe
         params:
           - name: slack-secret
-            value: webhook-secret
+            value: webhook-secret-tek
           - name: slack-message-url
-            value: $(params.git-repo-full-name)
+            value: $(params.gitfullname)
           - name: REPO_FULL_NAME
             value: string
           - name: SHA
-            value: $(params.git-repo-sha)
+            value: $(params.gitsha)
           - name: TARGET_URL
-            value: $(params.git-repo-target-url)
-        serviceAccountName: build-bot
+            value: $(params.giturl)
+        serviceAccountName: build-bot-tek

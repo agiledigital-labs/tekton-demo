@@ -2,15 +2,15 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: github-listener-interceptor
+  name: github-listener-interceptor-tek
 spec:
-  serviceAccountName: tekton-triggers-example-sa
+  serviceAccountName: tekton-triggers-example-sa-tek
   triggers:
     - name: normal-push
       interceptors:
         - github:
             secretRef:
-              secretName: githubsecret
+              secretName: githubsecret-tek
               secretKey: secretToken
             eventTypes:
               - push
@@ -19,41 +19,41 @@ spec:
         - cel:
             filter: "!body.ref.contains('develop')"
       bindings:
-        - name: git-repo-full-name
-        - name: git-repo-sha
-        - name: git-repo-target-url
+        - name: git-repo-full-name-tek
+        - name: git-repo-sha-tek
+        - name: git-repo-target-url-tek
       template:
         name: git-status-pipe
     - name: master-push
       interceptors:
         - github:
             secretRef:
-              secretName: githubsecret
+              secretName: githubsecret-tek
               secretKey: secretToken
             eventTypes:
               - push
         - cel:
             filter: "body.ref.contains('master')"
       bindings:
-        - name: git-repo-name
-        - name: git-common
+        - name: git-repo-name-tek
+        - name: git-common-tek
       template:
-        name: pipeline-master
+        name: pipeline-master-tek
     - name: dev-push
       interceptors:
         - github:
             secretRef:
-              secretName: githubsecret
+              secretName: githubsecret-tek
               secretKey: secretToken
             eventTypes:
               - push
         - cel:
             filter: "body.ref.contains('develop')"
       bindings:
-        - name: git-common
-        - name: git-repo-name
+        - name: git-common-tek
+        - name: git-repo-name-tek
       template:
-        name: pipeline-dev
+        name: pipeline-dev-tek
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -62,17 +62,17 @@ metadata:
     cert-manager.io/cluster-issuer: tek-demo-connect
     kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
-  name: tekton
+  name: tekton-tek
 spec:
   rules:
     - host: tek-demo.live
       http:
         paths:
           - backend:
-              serviceName: el-github-listener-interceptor
+              serviceName: el-github-listener-interceptor-tek
               servicePort: http-listener
             path: /docker
   tls:
     - hosts:
         - tek-demo.live
-      secretName: tek-web-tls-secret
+      secretName: tek-web-tls-secret-tek

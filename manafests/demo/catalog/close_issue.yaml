@@ -3,8 +3,6 @@ apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
   name: github-close-issue
-  description: |
-    This Task will close a pull request or an issue.
 spec:
   params:
     - name: GITHUB_HOST_URL
@@ -33,9 +31,8 @@ spec:
               name: github
               key: token
 
-      image: registry.access.redhat.com/ubi8/ubi:latest
+      image: python
       script: |
-        #!/usr/libexec/platform-python
         import json
         import os
         import http.client

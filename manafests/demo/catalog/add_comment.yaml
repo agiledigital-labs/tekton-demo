@@ -3,8 +3,6 @@ apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
   name: github-add-comment
-  description: |
-    This Task will add a comment to a pull request or an issue.
 spec:
   params:
     - name: GITHUB_HOST_URL
