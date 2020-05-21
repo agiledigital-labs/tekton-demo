@@ -6,24 +6,24 @@ metadata:
 spec:
   serviceAccountName: tekton-triggers-example-sa
   triggers:
-    # - name: normal-push
-    #   interceptors:
-    #     - github:
-    #         secretRef:
-    #           secretName: githubsecret
-    #           secretKey: secretToken
-    #         eventTypes:
-    #           - push
-    #     - cel:
-    #         filter: "!body.ref.contains('master')"
-    #     - cel:
-    #         filter: "!body.ref.contains('develop')"
-    #   bindings:
-    #     - name: git-common
-    #     - name: git-repo-name
-    #     - name: git-ref
-    #   template:
-    #     name: pipeline-not-master
+    - name: normal-push
+      interceptors:
+        - github:
+            secretRef:
+              secretName: githubsecret
+              secretKey: secretToken
+            eventTypes:
+              - push
+        - cel:
+            filter: "!body.ref.contains('master')"
+        - cel:
+            filter: "!body.ref.contains('develop')"
+      bindings:
+        - name: git-repo-full-name
+        - name: git-repo-sha
+        - name: git-repo-target-url
+      template:
+        name: git-status-pipe
     - name: master-push
       interceptors:
         - github:

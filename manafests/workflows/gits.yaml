@@ -9,7 +9,7 @@ spec:
     - name: revision
       value: master
     - name: url
-      value: <replace>
+      value: https://github.com/robinMcA/tekton-demo-git-op.git
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
@@ -21,6 +21,6 @@ spec:
     - name: revision
       value: develop
     - name: url
-      value: <replace>
+      value: https://github.com/robinMcA/tekton-demo-git-op.git
 ---
 

@@ -4,88 +4,88 @@ metadata:
   name: single-image-pipe
 spec:
   resources:
-  - name: source-repo
-    type: git
-  - name: argocd-repo
-    type: git
-  - name: image
-    type: image
+    - name: source-repo
+      type: git
+    - name: argocd-repo
+      type: git
+    - name: image
+      type: image
   params:
-  - name: slack-secret
-    type: string
-  - name: slack-message-url
-    type: string
+    - name: slack-secret
+      type: string
+    - name: slack-message-url
+      type: string
   tasks:
-  - name: send-slack-start
-    params:
-      - name: webhook-secret
-        value: $(params.slack-secret)
-      - name: message
-        value: The Pipeline for $(params.slack-message-url) started
-    taskRef:
-      name: send-to-webhook-slack
-  - name: build
-    taskRef:
-      name: build-push
-    params:
-    - name: pathToDockerFile
-      value: /workspace/workspace/Dockerfile
-    - name: pathToContext
-      value: /workspace/workspace/
-    resources:
-      inputs:
-      - name: workspace
-        resource: source-repo
-      outputs:
-      - name: builtImage
-        resource: image
-    runAfter: 
-      - send-slack-start
-  - name: push-dev
-    conditions:
-    - conditionRef: is-branch
+    - name: send-slack-start
       params:
-        - name: branchref
-          value: "develop"
-      resources:
-        - name: workspace
-          resource: argocd-repo
-    taskRef:
-      kind: Task
-      name: git-dev
-    runAfter: 
-      - build
-    resources:
-      inputs:
-      - name: workspace
-        resource: argocd-repo
-  - name: push-master
-    conditions:
-    - conditionRef: is-branch
+        - name: webhook-secret
+          value: $(params.slack-secret)
+        - name: message
+          value: The Pipeline for $(params.slack-message-url) started
+      taskRef:
+        name: send-to-webhook-slack
+    - name: build
+      taskRef:
+        name: build-push
       params:
-        - name: branchref
-          value: "master"
+        - name: pathToDockerFile
+          value: /workspace/workspace/Dockerfile
+        - name: pathToContext
+          value: /workspace/workspace/
       resources:
-        - name: workspace
-          resource: argocd-repo
-    taskRef:
-      kind: Task
-      name: git-master
-    runAfter: 
-      - build
-    resources:
-      inputs:
-      - name: workspace
-        resource: argocd-repo
-  - name: send-slack-end
-    conditions:
-    params:
-      - name: webhook-secret
-        value: $(params.slack-secret)
-      - name: message
-        value: "The Pipeline for $(params.slack-message-url) finished"
-    taskRef:
-      name: send-to-webhook-slack
-    runAfter: 
-      - build
-      - push-master
+        inputs:
+          - name: workspace
+            resource: source-repo
+        outputs:
+          - name: builtImage
+            resource: image
+      runAfter:
+        - send-slack-start
+    - name: push-dev
+      conditions:
+        - conditionRef: is-branch
+          params:
+            - name: branchref
+              value: "develop"
+          resources:
+            - name: workspace
+              resource: argocd-repo
+      taskRef:
+        kind: Task
+        name: git-dev
+      runAfter:
+        - build
+      resources:
+        inputs:
+          - name: workspace
+            resource: argocd-repo
+    - name: push-master
+      conditions:
+        - conditionRef: is-branch
+          params:
+            - name: branchref
+              value: "master"
+          resources:
+            - name: workspace
+              resource: argocd-repo
+      taskRef:
+        kind: Task
+        name: git-master
+      runAfter:
+        - build
+      resources:
+        inputs:
+          - name: workspace
+            resource: argocd-repo
+    - name: send-slack-end
+      conditions:
+      params:
+        - name: webhook-secret
+          value: $(params.slack-secret)
+        - name: message
+          value: "The Pipeline for $(params.slack-message-url) finished"
+      taskRef:
+        name: send-to-webhook-slack
+      runAfter:
+        - build
+        - push-master

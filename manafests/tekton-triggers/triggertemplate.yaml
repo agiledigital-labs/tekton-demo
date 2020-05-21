@@ -12,7 +12,7 @@ spec:
       default: master
     - name: gitreponame
       description: The git and image repo name
-      default: rise-sink
+      default: demo-sink
     - name: gitrepositoryurl
       description: The git repository url
   resourcetemplates:
@@ -25,7 +25,7 @@ spec:
           name: single-image-pipe
         params:
           - name: slack-secret
-            value: basic-slack
+            value: webhook-secret
           - name: slack-message-url
             value: $(params.gitrepositoryurl)
         resources:
@@ -62,7 +62,7 @@ spec:
       default: develop
     - name: gitreponame
       description: The git and image repo name
-      default: rise-sink
+      default: demo-sink
     - name: gitrepositoryurl
       description: The git repository url
   resourcetemplates:
@@ -75,7 +75,9 @@ spec:
           name: single-image-pipe
         params:
           - name: slack-secret
-            value: basic-slack
+            value: webhook-secret
+          - name: slack-message-url
+            value: $(params.gitrepositoryurl)
         resources:
           - name: argocd-repo
             resourceRef:
@@ -94,4 +96,37 @@ spec:
               params:
                 - name: url
                   value: adelabs/$(params.gitreponame):$(params.gitref)
+        serviceAccountName: build-bot
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: git-status-pipe
+spec:
+  params:
+    - name: git-repo-full-name
+      type: string
+    - name: git-repo-sha
+      type: string
+    - name: git-repo-target-url
+      type: string
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: pipeline-git-status-pipe-
+      spec:
+        pipelineRef:
+          name: git-status-pipe
+        params:
+          - name: slack-secret
+            value: webhook-secret
+          - name: slack-message-url
+            value: $(params.git-repo-full-name)
+          - name: REPO_FULL_NAME
+            value: string
+          - name: SHA
+            value: $(params.git-repo-sha)
+          - name: TARGET_URL
+            value: $(params.git-repo-target-url)
         serviceAccountName: build-bot

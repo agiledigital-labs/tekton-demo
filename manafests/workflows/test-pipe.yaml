@@ -1,0 +1,68 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: git-status-pipe
+spec:
+  params:
+    - name: slack-secret
+      type: string
+    - name: slack-message-url
+      type: string
+    - name: REPO_FULL_NAME
+      type: string
+    - name: SHA
+      type: string
+    - name: TARGET_URL
+      type: string
+  tasks:
+    - name: send-slack-start
+      params:
+        - name: webhook-secret
+          value: $(params.slack-secret)
+        - name: message
+          value: The Pipeline for $(params.slack-message-url) started _test_
+      taskRef:
+        name: send-to-webhook-slack
+    - name: status-set
+      taskRef:
+        name: github-set-status
+      params:
+        - name: REPO_FULL_NAME
+          value: $(params.REPO_FULL_NAME)
+        - name: SHA
+          value: $(params.SHA)
+        - name: DESCRIPTION
+          value: "Build has started"
+        - name: STATE
+          value: pending
+        - name: TARGET_URL
+          value: $(params.TARGET_URL)
+      runAfter:
+        - send-slack-start
+    - name: send-slack-end
+      conditions:
+      params:
+        - name: webhook-secret
+          value: $(params.slack-secret)
+        - name: message
+          value: "The Pipeline for $(params.slack-message-url) finished  _test_"
+      taskRef:
+        name: send-to-webhook-slack
+      runAfter:
+        - status
+    - name: status-change
+      taskRef:
+        name: github-set-status
+      params:
+        - name: REPO_FULL_NAME
+          value: $(params.REPO_FULL_NAME)
+        - name: SHA
+          value: $(params.SHA)
+        - name: DESCRIPTION
+          value: "Build has finished"
+        - name: STATE
+          value: success
+        - name: TARGET_URL
+          value: $(params.TARGET_URL)
+      runAfter:
+        - send-slack-end

@@ -6,4 +6,4 @@ metadata:
 secrets:
   - name: basic-user-pass
   - name: basic-docker
-  - name: basic-slack
+  - name: webhook-secret
